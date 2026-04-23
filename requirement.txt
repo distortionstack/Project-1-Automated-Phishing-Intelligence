@@ -1,0 +1,12 @@
+beautifulsoup4
+colorama
+ImageHash
+numpy
+pandas
+Pillow
+playwright
+requests
+scikit-learn
+shap
+tabulate
+xgboost
