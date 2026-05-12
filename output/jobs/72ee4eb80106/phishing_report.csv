@@ -1,0 +1,2 @@
+url,true_label,predicted_label,p_phish,reason_1,reason_2,reason_3,reason_4,reason_5,source,capture_mode,fallback_used,error_reason,status_code,load_time_ms,screenshot_path
+https://secure-paypal-login.example.tk,UNKNOWN,BENIGN,0.4682,path_depth=0.00(down_benign),special_char_count=2.00(up_phish),title_length=38.00(down_benign),n_dots=2.00(down_benign),brand_kw_in_url=3.00(up_phish),user_input,fallback,True,browser_disabled,0,0.0,output/jobs/72ee4eb80106/screenshots/page_000.png

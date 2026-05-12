@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Results {{ job.job_id }}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body data-page="result">
+  <div class="page-shell">
+    <header class="hero compact-hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Job {{ job.job_id }}</p>
+        <h1>Analysis Results</h1>
+        <p class="hero-text">ผลการวิเคราะห์ URL, metrics ของโมเดลอ้างอิง และ artifact ที่ดาวน์โหลดต่อได้</p>
+      </div>
+      <div class="hero-panel">
+        <span class="status-badge status-completed">completed</span>
+        <a class="secondary-link" href="/">New Analysis</a>
+      </div>
+    </header>
+
+    <main class="dashboard-grid">
+      <section class="card metrics-card neon-card">
+        <div class="section-heading">
+          <p class="section-kicker">Reference Metrics</p>
+          <h2>Model Quality</h2>
+        </div>
+        <div class="metric-grid">
+          {% set f1 = metrics.test_f1 or 0 %}
+          {% set precision = metrics.test_precision or 0 %}
+          {% set recall = metrics.test_recall or 0 %}
+          <div class="metric-block">
+            <span>F1</span>
+            <strong>{{ '%.3f'|format(f1) }}</strong>
+            <em class="metric-rating {{ 'good' if f1 >= 0.8 else 'mid' if f1 >= 0.6 else 'bad' }}">{{ 'ดี' if f1 >= 0.8 else 'ปานกลาง' if f1 >= 0.6 else 'แย่' }}</em>
+          </div>
+          <div class="metric-block">
+            <span>Precision</span>
+            <strong>{{ '%.3f'|format(precision) }}</strong>
+            <em class="metric-rating {{ 'good' if precision >= 0.8 else 'mid' if precision >= 0.6 else 'bad' }}">{{ 'ดี' if precision >= 0.8 else 'ปานกลาง' if precision >= 0.6 else 'แย่' }}</em>
+          </div>
+          <div class="metric-block">
+            <span>Recall</span>
+            <strong>{{ '%.3f'|format(recall) }}</strong>
+            <em class="metric-rating {{ 'good' if recall >= 0.8 else 'mid' if recall >= 0.6 else 'bad' }}">{{ 'ดี' if recall >= 0.8 else 'ปานกลาง' if recall >= 0.6 else 'แย่' }}</em>
+          </div>
+          <div class="metric-block">
+            <span>Train/Test</span>
+            <strong>{{ metrics.train_size or 0 }}/{{ metrics.test_size or 0 }}</strong>
+            <em class="metric-rating neutral">reference split</em>
+          </div>
+        </div>
+        <div class="artifact-links">
+          <a href="{{ job.artifacts.report_csv }}">Report CSV</a>
+          <a href="{{ job.artifacts.features_csv }}">Features CSV</a>
+          <a href="{{ job.artifacts.metrics_json }}">Metrics JSON</a>
+        </div>
+      </section>
+
+      <section class="card importance-card side-card">
+        <div class="section-heading">
+          <p class="section-kicker">Explainability</p>
+          <h2>Top Global Features</h2>
+        </div>
+        <div class="importance-list">
+          {% for feature, score in global_importance %}
+            <div class="importance-item">
+              <span>{{ feature }}</span>
+              <strong>{{ score }}</strong>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="card results-card neon-card">
+        <div class="section-heading">
+          <p class="section-kicker">Predictions</p>
+          <h2>URL Dashboard</h2>
+        </div>
+        <div class="results-table-wrap">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>URL</th>
+                <th>Risk Signal</th>
+                <th>Prediction</th>
+                <th>Capture</th>
+                <th>Reasons</th>
+                <th>Screenshot</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in report_rows %}
+                {% set risk = row.p_phish|float %}
+                {% set risk_level = 'HIGH RISK' if risk >= 0.75 else 'WATCH' if risk >= 0.4 else 'SAFE' %}
+                {% set is_phish = row.predicted_label == 'PHISHING' %}
+                <tr class="result-row {{ 'result-row-phish' if is_phish else 'result-row-safe' }}">
+                  <td class="url-cell">
+                    <div class="url-primary">{{ row.url }}</div>
+                    <div class="url-meta">{{ row.capture_mode }} · fallback {{ row.fallback_used }}</div>
+                  </td>
+                  <td>
+                    <div class="risk-block">
+                      <div class="risk-topline">
+                        <strong>{{ '%.0f'|format(risk * 100) }}%</strong>
+                        <span class="risk-tag {{ 'risk-high' if risk >= 0.75 else 'risk-mid' if risk >= 0.4 else 'risk-low' }}">{{ risk_level }}</span>
+                      </div>
+                      <div class="risk-bar">
+                        <div class="risk-fill {{ 'risk-fill-high' if risk >= 0.75 else 'risk-fill-mid' if risk >= 0.4 else 'risk-fill-low' }}" style="width: {{ '%.0f'|format(risk * 100) }}%"></div>
+                      </div>
+                      <p class="risk-help">{{ row.p_phish }} probability of phishing</p>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="status-badge status-{{ 'failed' if is_phish else 'completed' }}">
+                      {{ row.predicted_label }}
+                    </span>
+                  </td>
+                  <td class="capture-cell">
+                    <span class="mini-chip">{{ row.capture_mode }}</span>
+                    {% if row.error_reason %}
+                      <p class="error-inline">error: {{ row.error_reason }}</p>
+                    {% endif %}
+                  </td>
+                  <td class="reason-cell">
+                    <div class="reason-stack" data-reason-stack>
+                      <div class="reason-preview">
+                        <span class="reason-pill">{{ row.reason_1 }}</span>
+                        <span class="reason-pill">{{ row.reason_2 }}</span>
+                        <span class="reason-pill">{{ row.reason_3 }}</span>
+                      </div>
+                      <div class="reason-extra hidden">
+                        {% if row.reason_4 %}<span class="reason-pill subtle-pill">{{ row.reason_4 }}</span>{% endif %}
+                        {% if row.reason_5 %}<span class="reason-pill subtle-pill">{{ row.reason_5 }}</span>{% endif %}
+                      </div>
+                      {% if row.reason_4 or row.reason_5 %}
+                        <button class="expand-link" type="button" data-expand-reasons>Show all reasons</button>
+                      {% endif %}
+                    </div>
+                  </td>
+                  <td>
+                    {% if row.screenshot_url %}
+                      <button
+                        type="button"
+                        class="secondary-link screenshot-trigger"
+                        data-screenshot-url="{{ row.screenshot_url }}"
+                        data-screenshot-title="{{ row.url }}"
+                      >
+                        Preview
+                      </button>
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="screenshot-modal" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <strong id="modal-title">Screenshot Preview</strong>
+        <button id="modal-close" class="modal-close" type="button">×</button>
+      </div>
+      <img id="modal-image" src="" alt="Screenshot preview" />
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Processing {{ job.job_id }}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body data-job-id="{{ job.job_id }}" data-page="processing">
+  <div class="page-shell narrow-shell">
+    <a class="secondary-link" href="/">Back to Home</a>
+    <section class="card processing-card neon-card">
+      <p class="eyebrow">Job {{ job.job_id }}</p>
+      <h1>Processing Analysis</h1>
+      <p class="hero-text">ระบบกำลังประมวลผล URL ที่ส่งมาอยู่ และจะพาไปหน้า result อัตโนมัติเมื่อเสร็จ</p>
+
+      <div class="step-indicator" id="step-indicator">
+        <div class="step-chip is-active" data-stage-name="ingest"><span>1</span> Ingest</div>
+        <div class="step-chip" data-stage-name="capture"><span>2</span> Capture</div>
+        <div class="step-chip" data-stage-name="extract"><span>3</span> Extract</div>
+        <div class="step-chip" data-stage-name="model"><span>4</span> Model</div>
+        <div class="step-chip" data-stage-name="report"><span>5</span> Report</div>
+      </div>
+
+      <div class="progress-frame">
+        <div class="progress-meta">
+          <span id="job-status" class="status-badge status-{{ job.status }}">{{ job.status }}</span>
+          <strong id="job-stage">{{ job.stage }}</strong>
+          <strong id="job-progress-value" class="progress-value">{{ job.progress }}%</strong>
+        </div>
+        <div class="progress-bar glow-bar">
+          <div id="progress-fill" class="progress-fill" style="width: {{ job.progress }}%"></div>
+        </div>
+        <p id="job-message" class="muted">{{ job.message }}</p>
+      </div>
+
+      <div id="job-error-panel" class="error-panel hidden">
+        <h3>Analysis Failed</h3>
+        <p id="job-error-text">The job stopped before it could finish.</p>
+        <div class="job-error-actions">
+          <a class="primary-button" href="/">Try Again</a>
+          <a class="secondary-link" href="/history">Open History</a>
+        </div>
+      </div>
+
+      <div class="job-options">
+        <span>{{ job.urls|length }} URL(s)</span>
+        <span>Browser: {{ 'on' if job.use_browser else 'off' }}</span>
+        <span>Offline: {{ 'on' if job.offline_only else 'off' }}</span>
+      </div>
+    </section>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

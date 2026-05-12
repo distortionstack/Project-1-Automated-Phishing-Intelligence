@@ -1,0 +1,23 @@
+{
+  "job_id": "72ee4eb80106",
+  "urls": [
+    "https://secure-paypal-login.example.tk"
+  ],
+  "use_browser": false,
+  "offline_only": true,
+  "status": "completed",
+  "progress": 100,
+  "stage": "completed",
+  "message": "analysis completed",
+  "created_at": "2026-05-12T18:59:19.110893+00:00",
+  "updated_at": "2026-05-12T18:59:22.096635+00:00",
+  "error": null,
+  "artifacts": {
+    "report_csv": "/job-artifacts/72ee4eb80106/phishing_report.csv",
+    "features_csv": "/job-artifacts/72ee4eb80106/features.csv",
+    "metrics_json": "/job-artifacts/72ee4eb80106/metrics.json",
+    "screenshots": [
+      "/job-artifacts/72ee4eb80106/screenshots/page_000.png"
+    ]
+  }
+}

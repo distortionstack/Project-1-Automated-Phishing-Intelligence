@@ -1,50 +1,65 @@
-# Automated Phishing Intelligence — Refactored Prototype
+# Automated Phishing Intelligence
 
-โปรเจกต์นี้เป็นระบบต้นแบบสำหรับตรวจสอบและวิเคราะห์เว็บไซต์ฟิชชิ่งแบบอัตโนมัติ โดยหลังการ refactor รอบนี้โค้ดถูกแยกเป็นโมดูลชัดเจนขึ้น, ลด side effect ตอน import, เพิ่ม data contract ระหว่างแต่ละ stage และทำให้ระบบทดสอบกับตรวจสอบผลลัพธ์ได้ง่ายกว่าเดิม
+โปรเจกต์นี้เป็นต้นแบบระบบตรวจจับและวิเคราะห์เว็บไซต์ฟิชชิ่งแบบอัตโนมัติ โดยแยกส่วน core logic ให้อยู่ใน `src/phishing_intel/` และมีเว็บ dashboard ใน `app/` เพื่อให้ใช้งานง่ายขึ้น
 
-## โครงสร้างใหม่
+## โครงสร้างโปรเจกต์
 
-```text
-src/phishing_intel/
-├── config.py
-├── contracts.py
-├── ingestion.py
-├── browser.py
-├── model.py
-├── reporting.py
-├── pipeline.py
-└── features/
-    ├── url_features.py
-    ├── html_features.py
-    └── visual_features.py
-
-main.py
-phishing_intel.py
-tests/
+```
+.
+├── README.md
+├── main.py
+├── phishing_intel.py
+├── requirements.txt
+├── requirement.txt
+├── src/
+│   ├── __init__.py
+│   └── phishing_intel/
+│       ├── __init__.py
+│       ├── browser.py
+│       ├── config.py
+│       ├── contracts.py
+│       ├── ingestion.py
+│       ├── model.py
+│       ├── pipeline.py
+│       ├── reporting.py
+│       ├── utils.py
+│       └── features/
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── schemas.py
+│   ├── routes/
+│   │   ├── api.py
+│   │   └── pages.py
+│   ├── services/
+│   │   └── analysis_service.py
+│   ├── static/
+│   └── templates/
+├── tests/
+├── example/
+└── output/
 ```
 
-## แนวคิดการออกแบบ
+## คำอธิบายส่วนหลัก
 
-ระบบถูกแยกเป็น 5 ส่วนหลักเหมือนเดิม แต่เปลี่ยนจาก script เดียวเป็น orchestration + pure components
-
-1. `ingestion.py`
-   ดึง URL phishing/benign จาก source ภายนอก หรือ fallback เป็น demo dataset เมื่ออยู่ในโหมด offline
-2. `browser.py`
-   รับผิดชอบ capture หน้าเว็บ, HTML และ screenshot โดยแยก fallback path ออกมาอย่างชัดเจน
-3. `features/`
-   แยก URL, HTML และ visual features ออกจากกันเพื่อให้ทดสอบได้เป็น unit
-4. `model.py`
-   แยก `train`, `predict`, `explain` และประเมินด้วย train/test split + stratified CV
-5. `reporting.py`
-   สร้างรายงานจาก prediction และ metadata โดยไม่ผูกกับ internals ของ model
-
-## สิ่งที่ตรวจสอบได้ดีขึ้น
-
-- เก็บ `fallback_used`, `capture_mode`, `error_reason` ลงใน snapshot และ report
-- มี `metrics.json` สำหรับเก็บ F1, precision, recall, confusion matrix และ global feature importance
-- มี validation ของ feature matrix และ labels ก่อน train
-- synthetic fallback screenshot ถูกทำให้ deterministic มากขึ้น
-- เพิ่มชุดทดสอบ offline ใน `tests/`
+- `main.py` : entry point ของ CLI สำหรับรัน pipeline วิเคราะห์ URL และสร้างไฟล์ผลลัพธ์
+- `phishing_intel.py` : compatibility entry point แบบเก่า ใช้เรียก `run_pipeline()` แบบตรง ๆ
+- `requirements.txt` : รายการ dependency ของโปรเจกต์
+- `src/phishing_intel/` : core package ของระบบ
+  - `browser.py` : capture HTML, screenshot และ fallback capture
+  - `ingestion.py` : จัดการข้อมูล URL และ demo dataset
+  - `pipeline.py` : orchestration ของ ingestion, feature extraction, model, reporting
+  - `model.py` : สร้าง model, predict และประเมินผล
+  - `reporting.py` : สร้างรายงาน prediction และ metadata
+  - `utils.py` : ฟังก์ชันช่วยเหลือต่าง ๆ
+- `app/` : web dashboard บน FastAPI
+  - `main.py` : FastAPI application entry point
+  - `routes/` : API และหน้าเว็บ
+  - `services/analysis_service.py` : ตัวช่วยเชื่อม core logic กับเว็บ
+  - `templates/`, `static/` : frontend assets
+- `tests/` : ชุด unit tests
+- `example/` : ตัวอย่างหน้า phishing สำหรับ demo หรือ offline testing
+- `output/` : โฟลเดอร์เก็บผลลัพธ์และ artifacts ที่สร้างขึ้น
 
 ## การติดตั้ง
 
@@ -61,58 +76,58 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. ถ้าต้องการใช้ browser capture จริง ติดตั้ง Playwright browser เพิ่ม
+3. ถ้าต้องการให้ browser capture ทำงานจริง ๆ ให้ติดตั้ง Playwright browser
 
 ```bash
 playwright install chromium
 ```
 
-## วิธีรัน
+## การรัน
 
-รันผ่าน entry point ใหม่:
+### รัน pipeline แบบ CLI
 
 ```bash
 python main.py
 ```
 
-ตัวเลือกที่ใช้บ่อย:
+ตัวเลือกที่ใช้บ่อย
 
 ```bash
 python main.py --offline-only --no-browser
 python main.py --n-urls 10 --log-level DEBUG
 ```
 
-ยังสามารถเรียกแบบเดิมได้เพื่อ compatibility:
+### รันเว็บ dashboard
 
 ```bash
-python phishing_intel.py
+uvicorn app.main:app --reload
 ```
 
-## Output
+แล้วเปิดในเบราว์เซอร์
 
-เมื่อรันเสร็จ ระบบจะสร้าง artifact ใน `output/`
+```text
+http://127.0.0.1:8000
+```
 
-- `output/features.csv` ตาราง feature matrix
-- `output/phishing_report.csv` ตาราง prediction พร้อมเหตุผลและ metadata ของ fallback
-- `output/metrics.json` metric สำหรับตรวจสอบคุณภาพโมเดล
-- `output/screenshots/` screenshot จริงหรือ synthetic fallback
+## ผลลัพธ์ที่สร้าง
+
+เมื่อรัน pipeline จะได้ไฟล์หลักใน `output/`
+
+- `features.csv` : feature matrix ของ URL ที่ประมวลผล
+- `phishing_report.csv` : ผล prediction พร้อมเมตาดาต้า
+- `metrics.json` : metric ของโมเดล
+- `screenshots/` : screenshot จริงหรือ fallback
+- `jobs/<job_id>/` : artifact ของงานแต่ละ job เมื่อใช้เว็บ dashboard
 
 ## การทดสอบ
-
-รันชุดทดสอบแบบ offline:
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-ชุดทดสอบที่มีตอนนี้:
-
-- `test_url_features.py`
-- `test_html_features.py`
-- `test_browser_fallback.py`
-- `test_pipeline_smoke.py`
-
 ## หมายเหตุ
 
-- ตัวอย่างหน้า phishing ใน `example/` ถูกใช้เป็น fixture สำหรับโหมด demo/offline
-- ถ้า environment ไม่มี dependency บางตัว เช่น Playwright, SHAP หรือ ImageHash ระบบจะใช้ fallback path เท่าที่ทำได้ และจะสะท้อนสถานะนั้นออกมาในรายงานแทนการเงียบหาย
+- `app/main.py` เป็น FastAPI application
+- `src/phishing_intel` เป็น core logic ของระบบ
+- `example/` มีตัวอย่างหน้า phishing ที่ใช้เป็น fixture
+- หาก dependency ยังไม่ครบ เช่น `fastapi`, `uvicorn` หรือ `playwright` ระบบจะใช้ fallback path เท่าที่ทำได้

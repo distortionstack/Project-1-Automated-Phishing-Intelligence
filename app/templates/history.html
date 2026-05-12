@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analysis History</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="page-shell narrow-shell">
+    <header class="hero compact-hero">
+      <div class="hero-copy">
+        <p class="eyebrow">History</p>
+        <h1>Previous Analysis Jobs</h1>
+      </div>
+      <div class="hero-panel">
+        <a class="secondary-link" href="/">Back Home</a>
+      </div>
+    </header>
+    <section class="card card-history neon-card">
+      <div class="history-list history-list-large">
+        {% for job in jobs %}
+          <a class="history-item history-item-wide" href="/jobs/{{ job.job_id if job.status != 'completed' else job.job_id ~ '/result' }}">
+            <div class="history-meta">
+              <strong>{{ job.urls[0] if job.urls else job.job_id }}</strong>
+              <p>{{ job.urls|length }} URL(s) · {{ job.created_at }}</p>
+              <p class="history-subtle">{{ job.job_id }}</p>
+            </div>
+            <span class="status-badge status-{{ job.status }}">
+              {% if job.status in ['queued', 'running'] %}<span class="status-dot"></span>{% endif %}
+              {{ job.status }}
+            </span>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</body>
+</html>

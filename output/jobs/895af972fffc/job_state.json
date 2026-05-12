@@ -1,0 +1,23 @@
+{
+  "job_id": "895af972fffc",
+  "urls": [
+    "https://www.facebook.com/"
+  ],
+  "use_browser": true,
+  "offline_only": false,
+  "status": "completed",
+  "progress": 100,
+  "stage": "completed",
+  "message": "analysis completed",
+  "created_at": "2026-05-12T19:02:15.400760+00:00",
+  "updated_at": "2026-05-12T19:02:19.782009+00:00",
+  "error": null,
+  "artifacts": {
+    "report_csv": "/job-artifacts/895af972fffc/phishing_report.csv",
+    "features_csv": "/job-artifacts/895af972fffc/features.csv",
+    "metrics_json": "/job-artifacts/895af972fffc/metrics.json",
+    "screenshots": [
+      "/job-artifacts/895af972fffc/screenshots/page_000.png"
+    ]
+  }
+}

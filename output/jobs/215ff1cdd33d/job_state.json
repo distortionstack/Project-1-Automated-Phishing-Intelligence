@@ -1,0 +1,23 @@
+{
+  "job_id": "215ff1cdd33d",
+  "urls": [
+    "https://qwen.ai/qwencode"
+  ],
+  "use_browser": true,
+  "offline_only": false,
+  "status": "completed",
+  "progress": 100,
+  "stage": "completed",
+  "message": "analysis completed",
+  "created_at": "2026-05-12T19:42:06.201792+00:00",
+  "updated_at": "2026-05-12T19:42:11.332438+00:00",
+  "error": null,
+  "artifacts": {
+    "report_csv": "/job-artifacts/215ff1cdd33d/phishing_report.csv",
+    "features_csv": "/job-artifacts/215ff1cdd33d/features.csv",
+    "metrics_json": "/job-artifacts/215ff1cdd33d/metrics.json",
+    "screenshots": [
+      "/job-artifacts/215ff1cdd33d/screenshots/page_000.png"
+    ]
+  }
+}

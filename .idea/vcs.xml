@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/example/Google-login-page-clone" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/example/Instagram-and-Facebook-login-page" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/example/microsoft-login-clone" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/example/netflix-full-clone" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/example/paypal_login_clone" vcs="Git" />
+  </component>
+</project>

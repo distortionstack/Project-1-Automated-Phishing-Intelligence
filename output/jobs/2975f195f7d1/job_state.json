@@ -1,0 +1,23 @@
+{
+  "job_id": "2975f195f7d1",
+  "urls": [
+    "https://msocialbook.netlify.app/login"
+  ],
+  "use_browser": true,
+  "offline_only": false,
+  "status": "completed",
+  "progress": 100,
+  "stage": "completed",
+  "message": "analysis completed",
+  "created_at": "2026-05-12T20:11:25.173399+00:00",
+  "updated_at": "2026-05-12T20:11:31.941742+00:00",
+  "error": null,
+  "artifacts": {
+    "report_csv": "/job-artifacts/2975f195f7d1/phishing_report.csv",
+    "features_csv": "/job-artifacts/2975f195f7d1/features.csv",
+    "metrics_json": "/job-artifacts/2975f195f7d1/metrics.json",
+    "screenshots": [
+      "/job-artifacts/2975f195f7d1/screenshots/page_000.png"
+    ]
+  }
+}

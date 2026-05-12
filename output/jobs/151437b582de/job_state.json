@@ -1,0 +1,23 @@
+{
+  "job_id": "151437b582de",
+  "urls": [
+    "https://www.facebook.com/v7.0/dialog/oauth?response_type=code&scope=email&state=10610f62f6a4a6569544100c51aef1dc22b5d851678a999fc412544c4e641d23&redirect_uri=https%3A%2F%2Ffacebook-anmolsethi.vercel.app%2Fapi%2Fauth%2Fcallback%2Ffacebook&client_id=838249420107030"
+  ],
+  "use_browser": true,
+  "offline_only": false,
+  "status": "completed",
+  "progress": 100,
+  "stage": "completed",
+  "message": "analysis completed",
+  "created_at": "2026-05-12T19:05:22.527688+00:00",
+  "updated_at": "2026-05-12T19:05:26.690400+00:00",
+  "error": null,
+  "artifacts": {
+    "report_csv": "/job-artifacts/151437b582de/phishing_report.csv",
+    "features_csv": "/job-artifacts/151437b582de/features.csv",
+    "metrics_json": "/job-artifacts/151437b582de/metrics.json",
+    "screenshots": [
+      "/job-artifacts/151437b582de/screenshots/page_000.png"
+    ]
+  }
+}

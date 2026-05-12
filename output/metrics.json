@@ -1,0 +1,91 @@
+{
+  "random_forest_cv_f1_mean": 1.0,
+  "random_forest_cv_f1_std": 0.0,
+  "xgboost_cv_f1_mean": 0.9333333333333332,
+  "xgboost_cv_f1_std": 0.13333333333333336,
+  "test_f1": 1.0,
+  "test_precision": 1.0,
+  "test_recall": 1.0,
+  "test_confusion_matrix": [
+    [
+      3,
+      0
+    ],
+    [
+      0,
+      3
+    ]
+  ],
+  "test_classification_report": {
+    "Benign": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 3.0
+    },
+    "Phishing": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 3.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 6.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 6.0
+    }
+  },
+  "train_size": 14,
+  "test_size": 6,
+  "xgboost_enabled": true,
+  "global_feature_importance": [
+    [
+      "n_subdomains",
+      0.0832
+    ],
+    [
+      "url_entropy",
+      0.0757
+    ],
+    [
+      "url_length",
+      0.0747
+    ],
+    [
+      "n_dots",
+      0.0722
+    ],
+    [
+      "domain_length",
+      0.0584
+    ],
+    [
+      "path_depth",
+      0.0251
+    ],
+    [
+      "title_length",
+      0.0195
+    ],
+    [
+      "special_char_count",
+      0.0152
+    ],
+    [
+      "html_length",
+      0.0128
+    ],
+    [
+      "n_scripts",
+      0.0108
+    ]
+  ]
+}

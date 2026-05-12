@@ -1,0 +1,2 @@
+url,true_label,predicted_label,p_phish,reason_1,reason_2,reason_3,reason_4,reason_5,source,capture_mode,fallback_used,error_reason,status_code,load_time_ms,screenshot_path
+https://msocialbook.netlify.app/login,UNKNOWN,BENIGN,0.3982,special_char_count=0.00(down_benign),n_dots=2.00(down_benign),path_depth=1.00(down_benign),title_length=14.00(up_phish),url_entropy=3.88(down_benign),user_input,browser,False,,404,2145.92,output/jobs/2975f195f7d1/screenshots/page_000.png
