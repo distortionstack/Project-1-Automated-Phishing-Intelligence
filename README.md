@@ -1,60 +1,118 @@
-# Automated Phishing Intelligence — Prototype
+# Automated Phishing Intelligence — Refactored Prototype
 
-โปรเจกต์นี้เป็นระบบต้นแบบสำหรับตรวจสอบและวิเคราะห์เว็บไซต์ฟิชชิ่ง (Phishing) โดยอัตโนมัติ ซึ่งรวมเอาการดึงข้อมูลหน้าเว็บ การสกัดฟีเจอร์ (Feature Extraction) ทั้งทางภาพและโครงสร้าง HTML การใช้ Machine Learning และการอธิบายผลลัพธ์ด้วย SHAP (Explainable AI) เข้าด้วยกัน
+โปรเจกต์นี้เป็นระบบต้นแบบสำหรับตรวจสอบและวิเคราะห์เว็บไซต์ฟิชชิ่งแบบอัตโนมัติ โดยหลังการ refactor รอบนี้โค้ดถูกแยกเป็นโมดูลชัดเจนขึ้น, ลด side effect ตอน import, เพิ่ม data contract ระหว่างแต่ละ stage และทำให้ระบบทดสอบกับตรวจสอบผลลัพธ์ได้ง่ายกว่าเดิม
 
-## ⚙️ การทำงานของระบบ (Pipeline)
-ระบบทำงานผ่าน 5 ขั้นตอนหลัก ดังนี้:
+## โครงสร้างใหม่
 
-1. **Data Ingestion (การดึงข้อมูล):** 
-   - ดึงรายชื่อ URL ที่เป็นฟิชชิ่งจาก PhishTank และ URL ที่เป็นเว็บปกติจาก Tranco List
-   - หากไม่มีการเชื่อมต่ออินเทอร์เน็ต ระบบจะใช้ชุดข้อมูล Demo ที่เตรียมไว้ล่วงหน้าแทน
-2. **Browser Instrumentation (การท่องเว็บและบันทึกภาพ):** 
-   - ใช้ **Playwright** เปิดเบราว์เซอร์ Chromium แบบ Headless เพื่อเข้าสู่ URL
-   - บันทึกระยะเวลาในการโหลดหน้าเว็บ, Status Code, ดึงซอร์สโค้ด HTML, และ **ถ่าย Screenshot** หน้าเว็บ (หากเข้าเว็บไม่ได้ ระบบจะจำลองรูปภาพ Screenshot และ HTML ขึ้นมาสำหรับการสาธิต)
-3. **Feature Extraction (การสกัดคุณลักษณะ):**
-   - **URL Features:** ความยาว URL, โครงสร้างโดเมน, ระดับเอนโทรปี (Entropy), การมีอยู่ของ TLD ที่น่าสงสัย และคำสำคัญของแบรนด์ (เช่น paypal, facebook)
-   - **Visual Features:** ตรวจสอบโทนสี (Color Analysis), ค้นหาสีที่เป็นเอกลักษณ์ของแบรนด์ และเปรียบเทียบโครงสร้างภาพ (Perceptual Hash - ImageHash) กับหน้าเว็บของแบรนด์ดัง
-   - **HTML Features:** จำนวนแท็ก `<form>`, `<iframe>`, `<script>`, โค้ด JavaScript ที่น่าสงสัย, พาสเวิร์ดฟิลด์ และลิงก์ภายนอก
-4. **ML Modeling (การวิเคราะห์ด้วย Machine Learning):**
-   - นำฟีเจอร์ที่สกัดได้ไปสอนและทดสอบกับโมเดล **Random Forest** และ **XGBoost** (ใช้เทคนิค Ensemble และประเมินผลแบบ Cross-Validation)
-5. **SHAP Reporting (การอธิบายผลด้วย AI):**
-   - ใช้ **SHAP (SHapley Additive exPlanations)** เพื่อบอกเหตุผลระดับลึกว่า ทำไมระบบถึงมองว่าหน้าเว็บนี้เป็นฟิชชิ่ง (เช่น พบช่องกรอกพาสเวิร์ดมากผิดปกติ, URL มีความน่าสงสัยสูง เป็นต้น)
-   - สรุปผลลัพธ์และเซฟเป็นไฟล์รีพอร์ต
+```text
+src/phishing_intel/
+├── config.py
+├── contracts.py
+├── ingestion.py
+├── browser.py
+├── model.py
+├── reporting.py
+├── pipeline.py
+└── features/
+    ├── url_features.py
+    ├── html_features.py
+    └── visual_features.py
 
----
+main.py
+phishing_intel.py
+tests/
+```
 
-## 🛠 สิ่งที่ต้องติดตั้ง (Prerequisites & Installation)
+## แนวคิดการออกแบบ
 
-ระบบนี้เขียนด้วย Python และใช้ไลบรารีที่ระบุไว้ใน `requirements.txt`
+ระบบถูกแยกเป็น 5 ส่วนหลักเหมือนเดิม แต่เปลี่ยนจาก script เดียวเป็น orchestration + pure components
 
-1. แนะนำให้สร้าง Virtual Environment ก่อน (เป็นตัวเลือกเสริม):
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # สำหรับ Linux/Mac
-   # หรือ venv\Scripts\activate สำหรับ Windows
-   ```
+1. `ingestion.py`
+   ดึง URL phishing/benign จาก source ภายนอก หรือ fallback เป็น demo dataset เมื่ออยู่ในโหมด offline
+2. `browser.py`
+   รับผิดชอบ capture หน้าเว็บ, HTML และ screenshot โดยแยก fallback path ออกมาอย่างชัดเจน
+3. `features/`
+   แยก URL, HTML และ visual features ออกจากกันเพื่อให้ทดสอบได้เป็น unit
+4. `model.py`
+   แยก `train`, `predict`, `explain` และประเมินด้วย train/test split + stratified CV
+5. `reporting.py`
+   สร้างรายงานจาก prediction และ metadata โดยไม่ผูกกับ internals ของ model
 
-2. ติดตั้งไลบรารีที่จำเป็น:
-   ```bash
-   pip install -r requirements.txt
-   ```
+## สิ่งที่ตรวจสอบได้ดีขึ้น
 
-3. ติดตั้งเบราว์เซอร์สำหรับ Playwright:
-   ```bash
-   playwright install chromium
-   ```
+- เก็บ `fallback_used`, `capture_mode`, `error_reason` ลงใน snapshot และ report
+- มี `metrics.json` สำหรับเก็บ F1, precision, recall, confusion matrix และ global feature importance
+- มี validation ของ feature matrix และ labels ก่อน train
+- synthetic fallback screenshot ถูกทำให้ deterministic มากขึ้น
+- เพิ่มชุดทดสอบ offline ใน `tests/`
 
----
+## การติดตั้ง
 
-## 🚀 วิธีการรัน (How to Run)
+1. สร้าง virtual environment
 
-คุณสามารถสั่งรันสคริปต์หลักได้โดยตรง:
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+
+2. ติดตั้ง dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+3. ถ้าต้องการใช้ browser capture จริง ติดตั้ง Playwright browser เพิ่ม
+
+```bash
+playwright install chromium
+```
+
+## วิธีรัน
+
+รันผ่าน entry point ใหม่:
+
+```bash
+python main.py
+```
+
+ตัวเลือกที่ใช้บ่อย:
+
+```bash
+python main.py --offline-only --no-browser
+python main.py --n-urls 10 --log-level DEBUG
+```
+
+ยังสามารถเรียกแบบเดิมได้เพื่อ compatibility:
 
 ```bash
 python phishing_intel.py
 ```
 
-เมื่อทำงานเสร็จสิ้น ระบบจะสร้างโฟลเดอร์ `output/` และบันทึกผลลัพธ์ต่างๆ เอาไว้ ได้แก่:
-- `output/screenshots/` : โฟลเดอร์เก็บรูปภาพ Screenshot หน้าเว็บทั้งหมดที่ระบบเข้าไปวิเคราะห์
-- `output/features.csv` : ตารางข้อมูล Features ทั้งหมดที่ระบบสกัดออกมาจากแต่ละ URL
-- `output/phishing_report.csv` : ตารางรายงานผลลัพธ์การทำนาย พร้อมคำอธิบายเหตุผลจากโมเดล SHAP (Top reasons) ว่าเหตุใดจึงถูกมองว่าเป็นฟิชชิ่ง หรือเว็บปกติ
+## Output
+
+เมื่อรันเสร็จ ระบบจะสร้าง artifact ใน `output/`
+
+- `output/features.csv` ตาราง feature matrix
+- `output/phishing_report.csv` ตาราง prediction พร้อมเหตุผลและ metadata ของ fallback
+- `output/metrics.json` metric สำหรับตรวจสอบคุณภาพโมเดล
+- `output/screenshots/` screenshot จริงหรือ synthetic fallback
+
+## การทดสอบ
+
+รันชุดทดสอบแบบ offline:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+ชุดทดสอบที่มีตอนนี้:
+
+- `test_url_features.py`
+- `test_html_features.py`
+- `test_browser_fallback.py`
+- `test_pipeline_smoke.py`
+
+## หมายเหตุ
+
+- ตัวอย่างหน้า phishing ใน `example/` ถูกใช้เป็น fixture สำหรับโหมด demo/offline
+- ถ้า environment ไม่มี dependency บางตัว เช่น Playwright, SHAP หรือ ImageHash ระบบจะใช้ fallback path เท่าที่ทำได้ และจะสะท้อนสถานะนั้นออกมาในรายงานแทนการเงียบหาย
